@@ -4,30 +4,30 @@ using UnrealBuildTool;
 
 public class MICRep : ModuleRules
 {
-	public MICRep(TargetInfo Target)
-	{
-		PublicIncludePaths.AddRange(new string[]
-			{
-				"PoseReceiver/Public",
-			});
-		PrivateIncludePaths.AddRange(new string[]
-			{
-				"PoseReceiver/Private",
-			});
+    public MICRep(ReadOnlyTargetRules Target) : base(Target)
+    {
+        PublicIncludePaths.AddRange(new string[]
+            {
+                "PoseReceiver/Public",
+            });
+        PrivateIncludePaths.AddRange(new string[]
+            {
+                "PoseReceiver/Private",
+            });
 
-		PublicDependencyModuleNames.AddRange(new string[]
-			{
-				"Core",
-				"CoreUObject",
-				"Engine",
-				"LevelEditor",
-				"UnrealEd",
-				"AssetRegistry",
-				"SlateCore",
-				"Slate",
-				"ContentBrowser",
-				"AssetTools",
-				"EditorWidgets",
-			});
-	}
+        PublicDependencyModuleNames.AddRange(new string[]
+            {
+                "Core",
+                "CoreUObject",
+                "Engine",
+                "LevelEditor",
+                "UnrealEd",
+                "AssetRegistry",
+                "SlateCore",
+                "Slate",
+                "ContentBrowser",
+                "AssetTools",
+                "EditorWidgets",
+            });
+    }
 }
