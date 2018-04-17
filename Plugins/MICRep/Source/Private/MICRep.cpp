@@ -1,4 +1,4 @@
-ï»¿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "MICRep.h"
 #include "LevelEditor.h"
@@ -7,8 +7,8 @@
 #include "IContentBrowserSingleton.h"
 #include "AssetToolsModule.h"
 #include "IAssetTools.h"
-#include "SAssetSearchBox.h"
 #include "Factories/MaterialInstanceConstantFactoryNew.h"
+#include "SAssetSearchBox.h"
 
 
 #define LOCTEXT_NAMESPACE "MICRep"
@@ -46,16 +46,16 @@ namespace
 
 void FMICRepModule::StartupModule()
 {
-	if(IsRunningCommandlet()){ return; }
+	if (IsRunningCommandlet()) { return; }
 
 	FContentBrowserModule& ContentBrowserModule =
 		FModuleManager::LoadModuleChecked<FContentBrowserModule>(TEXT("ContentBrowser"));
 
-	// ã‚¢ã‚»ãƒƒãƒˆå³ã‚¯ãƒªãƒƒã‚¯ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã¸ã®Extenderç™»éŒ² 
+	// ƒAƒZƒbƒg‰EƒNƒŠƒbƒNƒƒjƒ…[‚Ö‚ÌExtender“o˜^ 
 	ContentBrowserExtenderDelegate =
 		FContentBrowserMenuExtender_SelectedAssets::CreateStatic(
 			&FMICRepModule::OnExtendContentBrowserAssetSelectionMenu
-			);
+		);
 	TArray<FContentBrowserMenuExtender_SelectedAssets>& CBMenuExtenderDelegates =
 		ContentBrowserModule.GetAllAssetViewContextMenuExtenders();
 	CBMenuExtenderDelegates.Add(ContentBrowserExtenderDelegate);
@@ -65,12 +65,12 @@ void FMICRepModule::ShutdownModule()
 {
 	FContentBrowserModule* ContentBrowserModule =
 		FModuleManager::GetModulePtr<FContentBrowserModule>(TEXT("ContentBrowser"));
-	if(nullptr != ContentBrowserModule)
+	if (nullptr != ContentBrowserModule)
 	{
 		TArray<FContentBrowserMenuExtender_SelectedAssets>& CBMenuExtenderDelegates =
 			ContentBrowserModule->GetAllAssetViewContextMenuExtenders();
 		CBMenuExtenderDelegates.RemoveAll([](const FContentBrowserMenuExtender_SelectedAssets& Delegate)
-			{ return Delegate.GetHandle() == ContentBrowserExtenderDelegateHandle; });
+		{ return Delegate.GetHandle() == ContentBrowserExtenderDelegateHandle; });
 	}
 }
 
@@ -81,21 +81,21 @@ TSharedRef<FExtender> FMICRepModule::OnExtendContentBrowserAssetSelectionMenu(co
 
 	bool bAnyMeshes = false;
 	bool bAnyMICs = false;
-	for(auto ItAsset = SelectedAssets.CreateConstIterator(); ItAsset; ++ItAsset)
+	for (auto ItAsset = SelectedAssets.CreateConstIterator(); ItAsset; ++ItAsset)
 	{
 		bAnyMeshes |= ((*ItAsset).AssetClass == UStaticMesh::StaticClass()->GetFName());
 		bAnyMeshes |= ((*ItAsset).AssetClass == USkeletalMesh::StaticClass()->GetFName());
-		bAnyMICs   |= ((*ItAsset).AssetClass == UMaterialInstanceConstant::StaticClass()->GetFName());
+		bAnyMICs |= ((*ItAsset).AssetClass == UMaterialInstanceConstant::StaticClass()->GetFName());
 	}
 
-	if(bAnyMeshes | bAnyMICs)
+	if (bAnyMeshes | bAnyMICs)
 	{
 		Extender->AddMenuExtension(
 			"GetAssetActions",
 			EExtensionHook::After,
 			nullptr,
 			FMenuExtensionDelegate::CreateStatic(&FMICRepModule::CreateAssetMenu, SelectedAssets)
-			);
+		);
 	}
 
 	return Extender;
@@ -105,21 +105,21 @@ void FMICRepModule::CreateAssetMenu(FMenuBuilder& MenuBuilder, TArray<FAssetData
 	int32 MeshesCount = 0;
 	int32 MICCount = 0;
 	bool bAnyMICs = false;
-	for(auto ItAsset = SelectedAssets.CreateConstIterator(); ItAsset; ++ItAsset)
+	for (auto ItAsset = SelectedAssets.CreateConstIterator(); ItAsset; ++ItAsset)
 	{
-		if(    ((*ItAsset).AssetClass == UStaticMesh::StaticClass()->GetFName())
+		if (((*ItAsset).AssetClass == UStaticMesh::StaticClass()->GetFName())
 			|| ((*ItAsset).AssetClass == USkeletalMesh::StaticClass()->GetFName())
 			)
 		{
 			MeshesCount++;
 		}
-		else if(((*ItAsset).AssetClass == UMaterialInstanceConstant::StaticClass()->GetFName()))
+		else if (((*ItAsset).AssetClass == UMaterialInstanceConstant::StaticClass()->GetFName()))
 		{
 			MICCount++;
 		}
 	}
 
-	if(0 < MeshesCount)
+	if (0 < MeshesCount)
 	{
 		MenuBuilder.AddMenuEntry(
 			LOCTEXT("ReplaceMaterials", "ReplaceMaterials"),
@@ -128,8 +128,8 @@ void FMICRepModule::CreateAssetMenu(FMenuBuilder& MenuBuilder, TArray<FAssetData
 			FUIAction(FExecuteAction::CreateStatic(&FMICRepModule::ReplaceMaterials, SelectedAssets)),
 			NAME_None,
 			EUserInterfaceActionType::Button
-			);
-		if(2 <= MeshesCount)
+		);
+		if (2 <= MeshesCount)
 		{
 			MenuBuilder.AddMenuEntry(
 				LOCTEXT("ReplaceMaterials(Unify)", "ReplaceMaterials(Unify)"),
@@ -138,16 +138,16 @@ void FMICRepModule::CreateAssetMenu(FMenuBuilder& MenuBuilder, TArray<FAssetData
 				FUIAction(FExecuteAction::CreateStatic(&FMICRepModule::ReplaceMaterialsUnify, SelectedAssets)),
 				NAME_None,
 				EUserInterfaceActionType::Button
-				);
+			);
 		}
 	}
-	if(0 < MICCount)
+	if (0 < MICCount)
 	{
 		MenuBuilder.AddSubMenu(
 			LOCTEXT("ReparentMaterialInstance", "Reparent MaterialInstance"),
 			LOCTEXT("ReparentMaterialInstance_Tooltip", "Reparent MaterialInstance"),
 			FNewMenuDelegate::CreateStatic(&FMICRepModule::CreateReparentSubMenu, SelectedAssets)
-			);
+		);
 	}
 }
 void FMICRepModule::CreateReparentSubMenu(FMenuBuilder& MenuBuilder, TArray<FAssetData> SelectedAssets)
@@ -156,7 +156,7 @@ void FMICRepModule::CreateReparentSubMenu(FMenuBuilder& MenuBuilder, TArray<FAss
 		LOCTEXT("ReparentMaterialInstance", "Reparent MaterialInstance"),
 		LOCTEXT("ReparentMaterialInstance_Tooltip", "Reparent MaterialInstance"),
 		FNewMenuDelegate::CreateStatic(&FMICRepModule::CreateReparentSubSubMenu, SelectedAssets)
-		);
+	);
 }
 void FMICRepModule::CreateReparentSubSubMenu(FMenuBuilder& MenuBuilder, TArray<FAssetData> SelectedAssets)
 {
@@ -175,15 +175,15 @@ void FMICRepModule::CreateReparentSubSubMenu(FMenuBuilder& MenuBuilder, TArray<F
 }
 
 //
-// StaticMesh/SkeletalMeshãƒãƒ†ãƒªã‚¢ãƒ«ã®ä¸€æ‹¬ç½®æ› 
+// StaticMesh/SkeletalMeshƒ}ƒeƒŠƒAƒ‹‚ÌˆêŠ‡’uŠ· 
 //
 void FMICRepModule::ReplaceMaterials(TArray<FAssetData> SelectedAssets)
 {
-	FAssetRegistryModule&  AssetRegistryModule  = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+	FAssetRegistryModule&  AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 	FContentBrowserModule& ContentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
-	FAssetToolsModule&     AssetToolsModule     = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
+	FAssetToolsModule&     AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
 
-	// ãƒ™ãƒ¼ã‚¹ãƒãƒ†ãƒªã‚¢ãƒ«ã®è¤‡è£½å…ƒã‚’å–å¾— 
+	// ƒx[ƒXƒ}ƒeƒŠƒAƒ‹‚Ì•¡»Œ³‚ğæ“¾ 
 	UMaterial* BaseMatOriginal = nullptr;
 	{
 		FAssetData AssetData = AssetRegistryModule.Get().GetAssetByObjectPath(FName(TEXT("/MICRep/M_MICRepBase.M_MICRepBase")));
@@ -192,17 +192,17 @@ void FMICRepModule::ReplaceMaterials(TArray<FAssetData> SelectedAssets)
 	}
 
 	TArray<UObject*> ObjectsToSync;
-	for(auto ItAsset = SelectedAssets.CreateConstIterator(); ItAsset; ++ItAsset)
+	for (auto ItAsset = SelectedAssets.CreateConstIterator(); ItAsset; ++ItAsset)
 	{
-		// ç·¨é›†å¯¾è±¡ãƒ¡ãƒƒã‚·ãƒ¥ã‚’å–å¾— 
+		// •ÒW‘ÎÛƒƒbƒVƒ…‚ğæ“¾ 
 		const FAssetData& MeshAssetData = (*ItAsset);
 		UObject* TargetAsset = MeshAssetData.GetAsset();
-		if(nullptr == TargetAsset)
+		if (nullptr == TargetAsset)
 		{
 			continue;
 		}
 
-		// ãƒ™ãƒ¼ã‚¹ãƒãƒ†ãƒªã‚¢ãƒ«ã‚’è¤‡è£½ 
+		// ƒx[ƒXƒ}ƒeƒŠƒAƒ‹‚ğ•¡» 
 		FString TargetPathName = FPackageName::GetLongPackagePath(TargetAsset->GetPathName());
 		UMaterial* BaseMat = nullptr;
 		FString BaseMatSimpleName;
@@ -214,7 +214,7 @@ void FMICRepModule::ReplaceMaterials(TArray<FAssetData> SelectedAssets)
 				BaseMatName,
 				TargetPathName,
 				BaseMatOriginal
-				);
+			);
 			BaseMat = Cast<UMaterial>(DuplicatedObject);
 			if (nullptr == BaseMat)
 			{
@@ -224,11 +224,11 @@ void FMICRepModule::ReplaceMaterials(TArray<FAssetData> SelectedAssets)
 
 		// StaticMesh 
 		UStaticMesh* TargetStaticMesh = Cast<UStaticMesh>(MeshAssetData.GetAsset());
-		if(nullptr != TargetStaticMesh)
+		if (nullptr != TargetStaticMesh)
 		{
-			// ãƒ¡ãƒƒã‚·ãƒ¥ã®å„ãƒãƒ†ãƒªã‚¢ãƒ«ã«ã¤ã„ã¦ 
+			// ƒƒbƒVƒ…‚ÌŠeƒ}ƒeƒŠƒAƒ‹‚É‚Â‚¢‚Ä 
 			int32 MatIdx = 0;
-			for(auto ItMat = TargetStaticMesh->StaticMaterials.CreateConstIterator(); ItMat; ++ItMat, ++MatIdx)
+			for (auto ItMat = TargetStaticMesh->StaticMaterials.CreateConstIterator(); ItMat; ++ItMat, ++MatIdx)
 			{
 				FStaticMaterial StaMat = TargetStaticMesh->StaticMaterials[MatIdx];
 
@@ -237,67 +237,67 @@ void FMICRepModule::ReplaceMaterials(TArray<FAssetData> SelectedAssets)
 					BaseMatSimpleName,
 					StaMat.MaterialInterface,
 					TargetPathName
-					);
-				if(nullptr == NewMIC)
-				{
-					continue;
-				}
-				ObjectsToSync.Add(NewMIC);
-
-				// ãƒ¡ãƒƒã‚·ãƒ¥ã«æ–°MICã‚’ã‚»ãƒƒãƒˆ 
-				StaMat.MaterialInterface = NewMIC;
-				TargetStaticMesh->StaticMaterials[MatIdx] = StaMat;
-			}
-
-			// ãƒ¡ãƒƒã‚·ãƒ¥ã‚¢ã‚»ãƒƒãƒˆã«è¦ä¿å­˜ãƒãƒ¼ã‚¯ 
-			TargetStaticMesh->MarkPackageDirty();
-		}
-
-		// SkeletalMesh 
-		USkeletalMesh* TargetSkeletalMesh = Cast<USkeletalMesh>(MeshAssetData.GetAsset());
-		if(nullptr != TargetSkeletalMesh)
-		{
-			// ãƒ¡ãƒƒã‚·ãƒ¥ã®å„ãƒãƒ†ãƒªã‚¢ãƒ«ã«ã¤ã„ã¦ 
-			int32 MatIdx = 0;
-			for(auto ItMat = TargetSkeletalMesh->Materials.CreateConstIterator(); ItMat; ++ItMat, ++MatIdx)
-			{
-				UMaterialInterface* NewMIC = CreateMIC(
-					BaseMat,
-					BaseMatSimpleName,
-					TargetSkeletalMesh->Materials[MatIdx].MaterialInterface,
-					TargetPathName
-					);
+				);
 				if (nullptr == NewMIC)
 				{
 					continue;
 				}
 				ObjectsToSync.Add(NewMIC);
 
-				// ãƒ¡ãƒƒã‚·ãƒ¥ã«æ–°MICã‚’ã‚»ãƒƒãƒˆ 
+				// ƒƒbƒVƒ…‚ÉVMIC‚ğƒZƒbƒg 
+				StaMat.MaterialInterface = NewMIC;
+				TargetStaticMesh->StaticMaterials[MatIdx] = StaMat;
+			}
+
+			// ƒƒbƒVƒ…ƒAƒZƒbƒg‚É—v•Û‘¶ƒ}[ƒN 
+			TargetStaticMesh->MarkPackageDirty();
+		}
+
+		// SkeletalMesh 
+		USkeletalMesh* TargetSkeletalMesh = Cast<USkeletalMesh>(MeshAssetData.GetAsset());
+		if (nullptr != TargetSkeletalMesh)
+		{
+			// ƒƒbƒVƒ…‚ÌŠeƒ}ƒeƒŠƒAƒ‹‚É‚Â‚¢‚Ä 
+			int32 MatIdx = 0;
+			for (auto ItMat = TargetSkeletalMesh->Materials.CreateConstIterator(); ItMat; ++ItMat, ++MatIdx)
+			{
+				UMaterialInterface* NewMIC = CreateMIC(
+					BaseMat,
+					BaseMatSimpleName,
+					TargetSkeletalMesh->Materials[MatIdx].MaterialInterface,
+					TargetPathName
+				);
+				if (nullptr == NewMIC)
+				{
+					continue;
+				}
+				ObjectsToSync.Add(NewMIC);
+
+				// ƒƒbƒVƒ…‚ÉVMIC‚ğƒZƒbƒg 
 				TargetSkeletalMesh->Materials[MatIdx].MaterialInterface = NewMIC;
 			}
 
-			// ãƒ¡ãƒƒã‚·ãƒ¥ã‚¢ã‚»ãƒƒãƒˆã«è¦ä¿å­˜ãƒãƒ¼ã‚¯ 
+			// ƒƒbƒVƒ…ƒAƒZƒbƒg‚É—v•Û‘¶ƒ}[ƒN 
 			TargetSkeletalMesh->MarkPackageDirty();
 		}
 	}
 
-	if(0 < ObjectsToSync.Num())
+	if (0 < ObjectsToSync.Num())
 	{
 		ContentBrowserModule.Get().SyncBrowserToAssets(ObjectsToSync, true);
 	}
 }
 
 //
-// StaticMesh/SkeletalMeshãƒãƒ†ãƒªã‚¢ãƒ«ã®ä¸€æ‹¬ç½®æ›ï¼ˆåŸºåº•ãƒãƒ†ãƒªã‚¢ãƒ«ã‚’çµ±ä¸€ï¼‰ 
+// StaticMesh/SkeletalMeshƒ}ƒeƒŠƒAƒ‹‚ÌˆêŠ‡’uŠ·iŠî’êƒ}ƒeƒŠƒAƒ‹‚ğ“ˆêj 
 //
 void FMICRepModule::ReplaceMaterialsUnify(TArray<FAssetData> SelectedAssets)
 {
-	FAssetRegistryModule&  AssetRegistryModule  = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+	FAssetRegistryModule&  AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 	FContentBrowserModule& ContentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
-	FAssetToolsModule&     AssetToolsModule     = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
+	FAssetToolsModule&     AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
 
-	// ãƒ™ãƒ¼ã‚¹ãƒãƒ†ãƒªã‚¢ãƒ«ã®è¤‡è£½å…ƒã‚’å–å¾— 
+	// ƒx[ƒXƒ}ƒeƒŠƒAƒ‹‚Ì•¡»Œ³‚ğæ“¾ 
 	UMaterial* BaseMatOriginal = nullptr;
 	{
 		FAssetData AssetData = AssetRegistryModule.Get().GetAssetByObjectPath(FName(TEXT("/MICRep/M_MICRepBase.M_MICRepBase")));
@@ -305,14 +305,14 @@ void FMICRepModule::ReplaceMaterialsUnify(TArray<FAssetData> SelectedAssets)
 		check(BaseMatOriginal);
 	}
 
-	// ãƒ™ãƒ¼ã‚¹ãƒãƒ†ãƒªã‚¢ãƒ«ã‚’è¤‡è£½ 
+	// ƒx[ƒXƒ}ƒeƒŠƒAƒ‹‚ğ•¡» 
 	UMaterial* BaseMat = nullptr;
 	FString BaseMatSimpleName;
 	{
-		for(auto ItAsset = SelectedAssets.CreateConstIterator(); ItAsset; ++ItAsset)
+		for (auto ItAsset = SelectedAssets.CreateConstIterator(); ItAsset; ++ItAsset)
 		{
 			UObject* TargetAsset = (*ItAsset).GetAsset();
-			if(nullptr == TargetAsset)
+			if (nullptr == TargetAsset)
 			{
 				continue;
 			}
@@ -326,33 +326,33 @@ void FMICRepModule::ReplaceMaterialsUnify(TArray<FAssetData> SelectedAssets)
 					BaseMatName,
 					TargetPathName,
 					BaseMatOriginal
-					);
+				);
 				BaseMat = Cast<UMaterial>(DuplicatedObject);
-				if(nullptr != BaseMat)
+				if (nullptr != BaseMat)
 				{
 					break;
 				}
 			}
 		}
 	}
-	if(nullptr == BaseMat)
+	if (nullptr == BaseMat)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Failed Create Base Material..."));
 		return;
 	}
 
-	// å…±é€šã®ãƒ†ã‚¯ã‚¹ãƒãƒ£ã§ã‚ã‚Œã°çµ±ä¸€ã™ã‚‹ãŸã‚ã€ç”Ÿæˆã—ãŸMICã‚’ä¿å­˜ 
+	// ‹¤’Ê‚ÌƒeƒNƒXƒ`ƒƒ‚Å‚ ‚ê‚Î“ˆê‚·‚é‚½‚ßA¶¬‚µ‚½MIC‚ğ•Û‘¶ 
 	// <ColorTexture, <NormalTexture, MIC>> 
 	TMap<UTexture*, TMap<UTexture*, UMaterialInterface*>> CreatedMICMap;
 
 
 	TArray<UObject*> ObjectsToSync;
-	for(auto ItAsset = SelectedAssets.CreateConstIterator(); ItAsset; ++ItAsset)
+	for (auto ItAsset = SelectedAssets.CreateConstIterator(); ItAsset; ++ItAsset)
 	{
-		// ç·¨é›†å¯¾è±¡ãƒ¡ãƒƒã‚·ãƒ¥ã‚’å–å¾— 
+		// •ÒW‘ÎÛƒƒbƒVƒ…‚ğæ“¾ 
 		const FAssetData& MeshAssetData = (*ItAsset);
 		UObject* TargetAsset = MeshAssetData.GetAsset();
-		if(nullptr == TargetAsset)
+		if (nullptr == TargetAsset)
 		{
 			continue;
 		}
@@ -360,11 +360,11 @@ void FMICRepModule::ReplaceMaterialsUnify(TArray<FAssetData> SelectedAssets)
 
 		// StaticMesh 
 		UStaticMesh* TargetStaticMesh = Cast<UStaticMesh>(MeshAssetData.GetAsset());
-		if(nullptr != TargetStaticMesh)
+		if (nullptr != TargetStaticMesh)
 		{
-			// ãƒ¡ãƒƒã‚·ãƒ¥ã®å„ãƒãƒ†ãƒªã‚¢ãƒ«ã«ã¤ã„ã¦ 
+			// ƒƒbƒVƒ…‚ÌŠeƒ}ƒeƒŠƒAƒ‹‚É‚Â‚¢‚Ä 
 			int32 MatIdx = 0;
-			for(auto ItMat = TargetStaticMesh->StaticMaterials.CreateConstIterator(); ItMat; ++ItMat, ++MatIdx)
+			for (auto ItMat = TargetStaticMesh->StaticMaterials.CreateConstIterator(); ItMat; ++ItMat, ++MatIdx)
 			{
 				FStaticMaterial StaMat = TargetStaticMesh->StaticMaterials[MatIdx];
 
@@ -373,33 +373,33 @@ void FMICRepModule::ReplaceMaterialsUnify(TArray<FAssetData> SelectedAssets)
 				GetTextureFromMaterial(StaMat.MaterialInterface, ColorTex, NormalTex);
 
 				bool bCreated = false;
-				if(CreatedMICMap.Contains(ColorTex))
+				if (CreatedMICMap.Contains(ColorTex))
 				{
-					if(CreatedMICMap[ColorTex].Contains(NormalTex))
+					if (CreatedMICMap[ColorTex].Contains(NormalTex))
 					{
-						// ãƒ¡ãƒƒã‚·ãƒ¥ã«MICã‚’ã‚»ãƒƒãƒˆ 
+						// ƒƒbƒVƒ…‚ÉMIC‚ğƒZƒbƒg 
 						StaMat.MaterialInterface = CreatedMICMap[ColorTex][NormalTex];
 						TargetStaticMesh->StaticMaterials[MatIdx] = StaMat;
 						bCreated = true;
 					}
 				}
 
-				if(!bCreated)
+				if (!bCreated)
 				{
 					UMaterialInterface* NewMIC = CreateMIC(
 						BaseMat,
 						BaseMatSimpleName,
 						StaMat.MaterialInterface,
 						TargetPathName
-						);
+					);
 
 					ObjectsToSync.Add(NewMIC);
 
-					// ãƒ¡ãƒƒã‚·ãƒ¥ã«æ–°MICã‚’ã‚»ãƒƒãƒˆ 
+					// ƒƒbƒVƒ…‚ÉVMIC‚ğƒZƒbƒg 
 					StaMat.MaterialInterface = NewMIC;
 					TargetStaticMesh->StaticMaterials[MatIdx] = StaMat;
 
-					if(!CreatedMICMap.Contains(ColorTex))
+					if (!CreatedMICMap.Contains(ColorTex))
 					{
 						TMap<UTexture*, UMaterialInterface*> Tmp;
 						CreatedMICMap.Add(ColorTex, Tmp);
@@ -408,48 +408,48 @@ void FMICRepModule::ReplaceMaterialsUnify(TArray<FAssetData> SelectedAssets)
 				}
 			}
 
-			// ãƒ¡ãƒƒã‚·ãƒ¥ã‚¢ã‚»ãƒƒãƒˆã«è¦ä¿å­˜ãƒãƒ¼ã‚¯ 
+			// ƒƒbƒVƒ…ƒAƒZƒbƒg‚É—v•Û‘¶ƒ}[ƒN 
 			TargetStaticMesh->MarkPackageDirty();
 		}
 
 		// SkeletalMesh 
 		USkeletalMesh* TargetSkeletalMesh = Cast<USkeletalMesh>(MeshAssetData.GetAsset());
-		if(nullptr != TargetSkeletalMesh)
+		if (nullptr != TargetSkeletalMesh)
 		{
-			// ãƒ¡ãƒƒã‚·ãƒ¥ã®å„ãƒãƒ†ãƒªã‚¢ãƒ«ã«ã¤ã„ã¦ 
+			// ƒƒbƒVƒ…‚ÌŠeƒ}ƒeƒŠƒAƒ‹‚É‚Â‚¢‚Ä 
 			int32 MatIdx = 0;
-			for(auto ItMat = TargetSkeletalMesh->Materials.CreateConstIterator(); ItMat; ++ItMat, ++MatIdx)
+			for (auto ItMat = TargetSkeletalMesh->Materials.CreateConstIterator(); ItMat; ++ItMat, ++MatIdx)
 			{
 				UTexture* ColorTex = nullptr;
 				UTexture* NormalTex = nullptr;
 				GetTextureFromMaterial(TargetSkeletalMesh->Materials[MatIdx].MaterialInterface, ColorTex, NormalTex);
 
 				bool bCreated = false;
-				if(CreatedMICMap.Contains(ColorTex))
+				if (CreatedMICMap.Contains(ColorTex))
 				{
-					if(CreatedMICMap[ColorTex].Contains(NormalTex))
+					if (CreatedMICMap[ColorTex].Contains(NormalTex))
 					{
-						// ãƒ¡ãƒƒã‚·ãƒ¥ã«MICã‚’ã‚»ãƒƒãƒˆ 
+						// ƒƒbƒVƒ…‚ÉMIC‚ğƒZƒbƒg 
 						TargetSkeletalMesh->Materials[MatIdx].MaterialInterface = CreatedMICMap[ColorTex][NormalTex];
 						bCreated = true;
 					}
 				}
 
-				if(!bCreated)
+				if (!bCreated)
 				{
 					UMaterialInterface* NewMIC = CreateMIC(
 						BaseMat,
 						BaseMatSimpleName,
 						TargetSkeletalMesh->Materials[MatIdx].MaterialInterface,
 						TargetPathName
-						);
+					);
 
 					ObjectsToSync.Add(NewMIC);
 
-					// ãƒ¡ãƒƒã‚·ãƒ¥ã«æ–°MICã‚’ã‚»ãƒƒãƒˆ 
+					// ƒƒbƒVƒ…‚ÉVMIC‚ğƒZƒbƒg 
 					TargetSkeletalMesh->Materials[MatIdx].MaterialInterface = NewMIC;
 
-					if(!CreatedMICMap.Contains(ColorTex))
+					if (!CreatedMICMap.Contains(ColorTex))
 					{
 						TMap<UTexture*, UMaterialInterface*> Tmp;
 						CreatedMICMap.Add(ColorTex, Tmp);
@@ -458,12 +458,12 @@ void FMICRepModule::ReplaceMaterialsUnify(TArray<FAssetData> SelectedAssets)
 				}
 			}
 
-			// ãƒ¡ãƒƒã‚·ãƒ¥ã‚¢ã‚»ãƒƒãƒˆã«è¦ä¿å­˜ãƒãƒ¼ã‚¯ 
+			// ƒƒbƒVƒ…ƒAƒZƒbƒg‚É—v•Û‘¶ƒ}[ƒN 
 			TargetSkeletalMesh->MarkPackageDirty();
 		}
 	}
 
-	if(0 < ObjectsToSync.Num())
+	if (0 < ObjectsToSync.Num())
 	{
 		ContentBrowserModule.Get().SyncBrowserToAssets(ObjectsToSync, true);
 	}
@@ -473,11 +473,11 @@ void FMICRepModule::GetTextureFromMaterial(
 	UMaterialInterface* Material,
 	UTexture*& OutColorTexture,
 	UTexture*& OutNormalTexture
-	)
+)
 {
 	OutColorTexture = nullptr;
 	OutNormalTexture = nullptr;
-	if(nullptr == Material)
+	if (nullptr == Material)
 	{
 		return;
 	}
@@ -490,7 +490,7 @@ void FMICRepModule::GetTextureFromMaterial(
 			Textures,
 			&TextureNames,
 			nullptr
-			);
+		);
 		if (0 < Textures.Num())
 		{
 			OutColorTexture = Textures[0];
@@ -504,7 +504,7 @@ void FMICRepModule::GetTextureFromMaterial(
 			Textures,
 			&TextureNames,
 			nullptr
-			);
+		);
 		if (0 < Textures.Num())
 		{
 			OutNormalTexture = Textures[0];
@@ -517,9 +517,9 @@ UMaterialInterface* FMICRepModule::CreateMIC(
 	FString BaseMaterialSimpleName,
 	UMaterialInterface* OldMaterial,
 	FString TargetPathName
-	)
+)
 {
-	if((nullptr == BaseMaterial) || (nullptr == OldMaterial))
+	if ((nullptr == BaseMaterial) || (nullptr == OldMaterial))
 	{
 		return nullptr;
 	}
@@ -527,19 +527,19 @@ UMaterialInterface* FMICRepModule::CreateMIC(
 	FAssetToolsModule& AssetToolsModule =
 		FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
 
-	// å…ƒãƒãƒ†ãƒªã‚¢ãƒ«æƒ…å ± 
+	// Œ³ƒ}ƒeƒŠƒAƒ‹î•ñ 
 	UTexture* ColorTex = nullptr;
 	UTexture* NormalTex = nullptr;
 	GetTextureFromMaterial(OldMaterial, ColorTex, NormalTex);
 
-	// æ–°MICå 
+	// VMIC–¼ 
 	FString NewMICName = FString::Printf(
 		TEXT("MI_%s_%s"),
 		*BaseMaterialSimpleName,
 		*(OldMaterial->GetName().Replace(TEXT("M_"), TEXT(""), ESearchCase::CaseSensitive))
-		);
+	);
 
-	// æ–°MICä½œæˆ 
+	// VMICì¬ 
 	UMaterialInstanceConstant* NewMIC = nullptr;
 	{
 		UMaterialInstanceConstantFactoryNew* Factory =
@@ -551,41 +551,41 @@ UMaterialInterface* FMICRepModule::CreateMIC(
 			TargetPathName,
 			UMaterialInstanceConstant::StaticClass(),
 			Factory
-			);
+		);
 
 		NewMIC = Cast<UMaterialInstanceConstant>(NewAsset);
 	}
-	if(nullptr == NewMIC)
+	if (nullptr == NewMIC)
 	{
 		return nullptr;
 	}
 
-	// æ–°MICã¸ãƒ†ã‚¯ã‚¹ãƒãƒ£è¨­å®š 
+	// VMIC‚ÖƒeƒNƒXƒ`ƒƒİ’è 
 	FStaticParameterSet StaticParams;
 	if (nullptr != ColorTex)
 	{
 		NewMIC->SetTextureParameterValueEditorOnly(
 			FName(TEXT("BaseColor")),
 			ColorTex
-			);
+		);
 	}
 	if (nullptr != NormalTex)
 	{
 		NewMIC->SetTextureParameterValueEditorOnly(
 			FName(TEXT("Normal")),
 			NormalTex
-			);
+		);
 	}
 	else
 	{
-		// NoramlMapä¸è¦ãªå ´åˆã¯StaticSwitchã§ã‚ªãƒ•ã«ã™ã‚‹ 
+		// NoramlMap•s—v‚Èê‡‚ÍStaticSwitch‚ÅƒIƒt‚É‚·‚é 
 		FStaticSwitchParameter Param;
-		Param.ParameterName = FName("UseNormal");
+		Param.ParameterInfo = FName("UseNormal"); //ParameterName
 		Param.Value = false;
 		Param.bOverride = true;
 		StaticParams.StaticSwitchParameters.Add(Param);
 	}
-	// StaticSwitchã®é©ç”¨ 
+	// StaticSwitch‚Ì“K—p 
 	if (0 < StaticParams.StaticSwitchParameters.Num())
 	{
 		NewMIC->UpdateStaticPermutation(StaticParams);
@@ -595,30 +595,30 @@ UMaterialInterface* FMICRepModule::CreateMIC(
 }
 
 //
-// ãƒãƒ†ãƒªã‚¢ãƒ«ã®ä¸€æ‹¬Reparent. 
+// ƒ}ƒeƒŠƒAƒ‹‚ÌˆêŠ‡Reparent. 
 //
 void FMICRepModule::ReparentMICs(const FAssetData& NewParentAssetData, TArray<FAssetData> SelectedAssets)
 {
-	// æ–°ãŸã«è¦ªã«ã™ã‚‹ãƒãƒ†ãƒªã‚¢ãƒ«ã‚’å–å¾— 
+	// V‚½‚Ée‚É‚·‚éƒ}ƒeƒŠƒAƒ‹‚ğæ“¾ 
 	UMaterialInterface* NewParent = Cast<UMaterialInterface>(NewParentAssetData.GetAsset());
-	if(nullptr == NewParent)
+	if (nullptr == NewParent)
 	{
 		return;
 	}
 
-	// å„é¸æŠã‚¢ã‚»ãƒƒãƒˆã«ã¤ã„ã¦ 
+	// Še‘I‘ğƒAƒZƒbƒg‚É‚Â‚¢‚Ä 
 	TArray<UObject*> ObjectsToSync;
-	for(auto ItAsset = SelectedAssets.CreateConstIterator(); ItAsset; ++ItAsset)
+	for (auto ItAsset = SelectedAssets.CreateConstIterator(); ItAsset; ++ItAsset)
 	{
-		// ç·¨é›†å¯¾è±¡MICã‚’å–å¾— 
+		// •ÒW‘ÎÛMIC‚ğæ“¾ 
 		const FAssetData& MICAssetData = (*ItAsset);
 		UMaterialInstanceConstant* TargetMIC = Cast<UMaterialInstanceConstant>(MICAssetData.GetAsset());
-		if(nullptr == TargetMIC)
+		if (nullptr == TargetMIC)
 		{
 			continue;
 		}
 
-		// è¦ªãƒãƒ†ãƒªã‚¢ãƒ«ã‚’å¤‰æ›´ 
+		// eƒ}ƒeƒŠƒAƒ‹‚ğ•ÏX 
 		TargetMIC->SetParentEditorOnly(NewParent);
 		TargetMIC->MarkPackageDirty();
 		TargetMIC->PostEditChange();
@@ -626,9 +626,9 @@ void FMICRepModule::ReparentMICs(const FAssetData& NewParentAssetData, TArray<FA
 		ObjectsToSync.Add(TargetMIC);
 	}
 
-	if(0 < ObjectsToSync.Num())
+	if (0 < ObjectsToSync.Num())
 	{
-		FContentBrowserModule& ContentBrowserModule = 
+		FContentBrowserModule& ContentBrowserModule =
 			FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
 
 		ContentBrowserModule.Get().SyncBrowserToAssets(ObjectsToSync, true);
